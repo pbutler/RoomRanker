@@ -1,0 +1,86 @@
+v.0.2.0
+
+* Ability to upload images to FriendFeed using Chris Atlee's poster library
+  (http://atlee.ca/software/poster/)
+* Added support for FriendFeed's new Search API, implemented in
+  FriendFeedAPI.search_iter() and .search()
+* Added ability to download profile pictures for users and rooms via
+  FriendFeedAPI.get_user_picture() and .get_room_picture()
+* Moved FriendFeedAPI.publish_link() to publish(). publish_link() exists but
+  now only publishes links. publish() serves as the new workhorse method.
+* Added method FriendFeedAPI.publish_image(), which publishes an image
+  provided either a file handle or a URL to an image
+* All the publish* methods now accept room as a parameter.
+* FriendFeedAPI.get_list_profile() accepts SubscriptionList instances. [See Bug
+  #358607]
+* Added FriendFeedAPI.hide_entry() and .unhide_entry().
+* Entries now print out whether or not they're hidden.
+* Patched to allow unicode in posted messages using the patch from dsallings
+  at http://code.google.com/p/friendfeed-api/issues/detail?id=17
+
+
+Bugfixes:
+
+* Bug #357624 AttributeError: 'Service' object has no attribute 'nickname'
+* Bug #358607 FriendFeedAPI.get_list_profile() doesn't accept SubscriptionList
+  instances
+
+v.0.1.1
+
+Bugfix for publish_link() not accepting a Room instance.
+
+v.0.1.0
+
+This version marks the first release of the object-oriented Python interface
+to FriendFeed. The original interface was published by FriendFeed, itself. The
+changes in this version are fairly extensive, though the main author of this
+release (Chris Lasher) has taken care to preserve and augment many of the
+previous methods.
+
+Major changes include the following:
+* The following entities are now represented as full-fledged classes:
+  - User
+  - ImaginaryFriend
+  - Service
+  - Room
+  - SubscriptionList
+  - Comment
+  - Media
+  - Entry
+
+  Please consult their docstrings for information on their attributes. To a
+  great extent, the attributes of these classes mirror those returned by the
+  JSON structures as described in the official FriendFeed API documentation. A
+  few exceptions exist, particularly in an effort to adhere to PEP 8 naming
+  conventions (e.g., `profileUrl` is instead `profile_url`), and some
+  attributes have been renamed for explicitness (e.g., `status` has been
+  renamed to `private` for the `User` and `Room` classes to indicate privacy).
+* The `FriendFeed` class has been renamed to `FriendFeedAPI`.
+* Nearly all of the API calls are implemented as methods in `FriendFeedAPI`,
+  including calls to obtain user and room profiles. Currently the realtime
+  methods are not implemented.
+* All methods making read-only calls to the FriendFeed API (GET requests)
+  return class instances; additionally, these instances' attributes are also
+  class instances unless otherwise specified. Methods making write calls to
+  the FriendFeed API (POST requests) return either class instances or
+  string-based statuses. Please see the docstrings of methods and classes for
+  details.
+* Methods no longer accept additional keyword arguments, as all parameters
+  have been made explicit in the methods now for clarity.
+* Many API calls returning multiple entities (e.g., feed calls returning
+  entries) are available as methods which return iterators, rather than
+  full-fledged lists, which may come in handy when one needs to process each
+  entity before continuing on. Each of these methods is affixed with _iter at
+  the end of it (e.g., FriendFeedAPI.fetch_public_feed_iter()). Methods
+  without the _itter suffix will typically return lists. In fact, many of the
+  methods which have _iter counterparts call list() upon the _iter method.
+* Error codes encoded in JSON now raise actual exceptions, one exception for
+  each type of error code. All exceptions are derived from the base class of
+  FriendFeedException for convenience of catching exceptions thrown by this
+  library.
+* When authentication is provided during FriendFeedAPI instantiation,
+  validation occurs during the instantiation process.
+* A great deal of documentation has been added in the form of docstrings.
+  Every parameter a function/method accepts should be described within its
+  repsective docstring. (Please send a bug report if you spot undescribed
+  parameters.)

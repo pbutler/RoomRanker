@@ -1,0 +1,184 @@
+= FriendFeed PyAPI =
+
+This library provides an object-driven Python interface to the FriendFeed API.
+(See http://code.google.com/p/friendfeed-api/wiki/ApiDocumentation for
+official FriendFeed API documentation.)
+
+== Requirements ==
+
+* Python of version 2.x where x is 5 or greater. (Python 3 support is planned
+  for a future release.)
+* A JSON parsing library. For Python 2.6 or greater, the standard library
+  includes the module json which is suitable. For Python 2.5 users, the
+  precursor library simplejson is recommended. You can obtain simplejson from
+  http://undefined.org/python/. For most Linux distributions, a package for
+  simplejson should exist. For example, Debian and Ubuntu users can install
+  the library with the following command
+
+    sudo apt-get install python-simplejson
+
+* The poster package is required for media file (image) uploads to FriendFeed.
+  Obtain this package from http://atlee.ca/software/poster/
+
+== Installation ==
+
+Installation of this library is done using the standard distutils for Python.
+After obtaining and unzipping a distribution of this library, installation
+should be possible with the following command:
+
+    python setup.py install
+
+You may prefer to keep the install local, such as
+
+    python setup.py install --prefix=/usr/local
+
+Or to install to your home directory, such as
+
+    python setup.py install --home=$HOME
+
+Please see the help for more options:
+
+    python setup.py --help
+
+== Usage ==
+
+All interaction with the FriendFeed API for this library takes place via the
+FriendFeedAPI class. Please see the documentation provided in the docstrings
+of the FriendFeedAPI methods for more information on each. Below appear
+examples of how to use the class.
+
+=== Example using read-only methods ===
+
+>>> # Retrieving the Public Feed
+>>> import friendfeed
+>>> session = friendfeed.FriendFeedAPI()
+>>> entries = session.fetch_public_feed()
+>>> print entries
+>>> print entries
+[<Entry {'id': u'af36c55d-d5bb-46fc-ca06-ec3b493f00a8',
+ 'likes': [],
+ 'title': u'Inside cinema now... Slumdog millionaire',
+ 'updated': datetime.datetime(2009, 1, 13, 20, 50, 26),
+ 'user': <User markhillary>}>
+    ...
+]
+>>> # Get the user of the first entry
+>>> user = entries[0].user
+>>> # Notice how this is a limited profile, we only have some user info.
+>>> user.name
+u'Mark Kobayashi-Hillary'
+>>> user.subscriptions
+[]
+>>>
+>>> # Let's get a full profile. We can just update the user profile.
+>>> session.update_user_profile(user)
+>>> # Now we have the full profile.
+>>> user.subscriptions
+[<User sanjana>, <User rorycellan>, <User dkinnear>, <User hayleyallman>, <User jobsworth>, <User vesnagerintes>, <User billt>, <User preetchandhoke>, <User loo>, <User gveltri>, <User jamiesymes>, <User darrenwaters>]
+>>> # We can see this user is subscribed to 12 other FF users:
+>>> len(user.subscriptions)
+12
+>>>
+>>> # We can get the first 2 entries in this user's feed:
+>>> session.fetch_user_feed(user, num=2)
+[<Entry {'id': u'af36c55d-d5bb-46fc-ca06-ec3b493f00a8',
+ 'likes': [],
+ 'title': u'Inside cinema now... Slumdog millionaire',
+ 'updated': datetime.datetime(2009, 1, 13, 20, 50, 26),
+ 'user': <User markhillary>}>, <Entry {'id': u'92e2458c-9272-56b8-968e-13e247cce139',
+ 'likes': [],
+ 'title': u'I am shocked how cheap it is in wetherspoons...',
+ 'updated': datetime.datetime(2009, 1, 13, 20, 8, 6),
+ 'user': <User markhillary>}>]
+>>>
+>>> # We can also do this using an iterator.
+>>> for entry in session.fetch_user_feed_iter(user, num=2):
+    print entry
+...     
+...     
+<Entry {'id': u'af36c55d-d5bb-46fc-ca06-ec3b493f00a8',
+ 'likes': [],
+ 'title': u'Inside cinema now... Slumdog millionaire',
+ 'updated': datetime.datetime(2009, 1, 13, 20, 50, 26),
+ 'user': <User markhillary>}>
+<Entry {'id': u'92e2458c-9272-56b8-968e-13e247cce139',
+ 'likes': [],
+ 'title': u'I am shocked how cheap it is in wetherspoons...',
+ 'updated': datetime.datetime(2009, 1, 13, 20, 8, 6),
+ 'user': <User markhillary>}>
+>>>
+>>> # We can find out all the users with public profiles who are members
+... # of a room
+...
+>>> room = session.get_room_profile('python')
+>>> room
+<Room python>
+>>> print room.members
+[<User genieyclo>,
+ <User amarkos>,
+    ...
+ <User harisgx>,
+ <User hellp>]
+>>> len(room.members)
+198
+>>>
+
+
+=== Example using authenticated session to publish ===
+
+>>> # Create an authenticated session
+>>> # Get your remote key from http://friendfeed.com/account/api
+>>> session = friendfeed.FriendFeedAPI('user', 'remotekey')
+>>> # Publish a message to the feed.
+>>> entry = session.publish_message('Hello, FriendFeed world!')
+>>> print entry
+<Entry {'id': u'494f15e2-707e-4ffb-83f9-a27859f54b97',
+ 'likes': [],
+ 'title': u'Hello, FriendFeed world!',
+ 'updated': datetime.datetime(2009, 1, 13, 21, 31, 49),
+ 'user': <User user>}>
+>>> # Delete the message. If it worked, this should return True.
+>>> session.delete_entry(entry)
+True
+>>>
+>>> # Grab an entry from our home feed.
+>>> entries = session.fetch_home_feed()
+>>> entry = entries[0]
+>>> print entry
+<Entry {'id': u'66a9a4a3-aa3c-3c2e-3b31-df9124d53391',
+ 'likes': [],
+ 'title': u'Working on the README. So close to release.',
+ 'updated': datetime.datetime(2009, 1, 13, 21, 10, 52),
+ 'user': <User gotgenes>}>
+>>> # We can "like" this entry
+>>> session.add_like(entry)
+True
+>>> # Verify we "liked" it by re-fetching the entry
+>>> entry = session.fetch_entry(entry.id)
+>>> entry.likes
+[{'date': datetime.datetime(2009, 1, 13, 21, 44, 36), 'user': <User user>}]
+>>> # And we can remove our "like".
+>>> session.delete_like(entry)
+True
+>>> # And verify
+>>> entry.likes
+[]
+>>>
+
+== Acknowledgements ==
+
+Chris Lasher would like to acknowledge the following:
+* the developers at FriendFeed, for the original code, and particularly
+  Benjamin Golub, who tirelessly answered my questions and explained and
+  improved the API documentation where I requested
+* Guido van Rossum and the Python developers
+* the Stack Overflow and #python communities for helping answer some of the
+  more challenging tasks I encountered
+* my family and friends
+
+== Reporting Problems ==
+
+For general questions, please visit
+https://launchpad.net/friendfeed-pyapi/+addquestion
+
+Bug reports should be filed at https://bugs.launchpad.net/friendfeed-pyapi

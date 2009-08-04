@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim: et ts=4 sw=4 smarttab
 # -*- coding: UTF-8 -*-
 
 """
@@ -117,12 +118,17 @@ def get_username_and_password(cli_opts):
 
 def get_api(username, password):
     if (username and password):
-        api = friendfeed.FriendFeed(username, password)
+        api = friendfeed.FriendFeedAPI(username, password)
     else:
         print "Not enough user information. Running unauthenticated."
-        api = friendfeed.FriendFeed()
+        api = friendfeed.FriendFeedAPI()
 
     return api
+
+def generate_rankings(users):
+    sortee = [ (len(v), k) for k,v in users.items() ]
+    sortee.sort()
+    return [ (k,v) for v,k in sortee ]
 
 
 def main(argv):

@@ -1,0 +1,21 @@
+For 0.3.0:
+* Remove mutable objects from default paramaters. See
+  http://effbot.org/zone/default-values.htm
+* Get a list of services from FriendFeed
+
+For Consideration:
+* The API allows getting user and room profiles by UUIDs. This should be
+  supported by the library. It raises the question of making nicknames
+  required attributes for User and Room.
+* None of the classes have __hash__ support but do have __eq__ and __ne__
+  support. This is considered a Python faux pas. The question is how to
+  resolve this.
+
+Wishlist:
+* Add unit tests for calls to the API. (Currently all tests are internal.)
+  - This requires mock tests?
+* Add an optional means of limiting the rate at which calls to the
+  FriendFeed API can be made.
+  - See http://stackoverflow.com/questions/401215/how-to-limit-rate-of-requests-to-web-services-in-python
+* Add realtime methods.
+* Add logging via the standard library logging module.

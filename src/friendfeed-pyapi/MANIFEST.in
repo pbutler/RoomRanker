@@ -1,0 +1,4 @@
+include CHANGELOG
+include LICENSE
+include TODO
+recursive-include tests *.py *.json

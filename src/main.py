@@ -40,7 +40,8 @@ class IndexHandler(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'index.html') 
         self.response.out.write(template.render(path, values))
 
-import friendfeed
+#import friendfeed
+import roomranker
 
 class RoomHandler(webapp.RequestHandler): 
     def get(self):
@@ -48,34 +49,24 @@ class RoomHandler(webapp.RequestHandler):
         if self.request.get('room') is None:
             self.response.out.write(template.render(path,{"body":"Need a room name"}))
 
-        roomname = self.request.get('roomname')
-        api = friendfeed.FriendAPI()
-        values = { 'body' : '', 'subtitle' : "And the winner is..." }
-
-
-        room = api.get_room_profile(roomname)
-        public = []
-        for m in room.members:
-            try: 
-                api.update_user_profile(m)
-                public += [m]
-            except HTTPError:
-                pass
-        nicks = [ m.nickname for m in public ] 
-        for m in pubic:
-
-
-
-
-        path = os.path.join(os.path.dirname(__file__), 'index.html') 
+        values = { 'body':'', 'subtitle' : 'And the Winner is ...'}
+        #roomranker.generate_rankings(users)
+        rankings = [ ("alpha",  10), ("beta", 5), ("omega", 1)]
+        values['body'] += "<table><tr><th>Rank</th><th>Name</th><th>Fans</th></tr>"
+        for i in range(len(rankings)):
+            values['body'] += "<tr><td>#%d:</td><td>%s</td><td>%d</td>" % (i+1, rankings[i][0], rankings[i][1])
+        values['body'] += "</table>"
         self.response.out.write(template.render(path, values))
-
+        return
 
 
 
 
 def main():
-  application = webapp.WSGIApplication([('/', IndexHandler)],
+  application = webapp.WSGIApplication([
+    ('/', IndexHandler),
+    ('/room', RoomHandler)
+  ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

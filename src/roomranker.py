@@ -23,7 +23,7 @@ import friendfeed
 RC_FILE = '.roomrankerrc'
 # By default, this program will look under the user's home directory for
 # a configuration
-RC_PATH = os.path.expanduser('~') + os.sep + RC_FILE
+#RC_PATH = os.path.expanduser('~') + os.sep + RC_FILE
 
 # The configuration file should be a file containing one section with
 # two variables: username and password. For example, it should look
@@ -128,6 +128,7 @@ def get_api(username, password):
 def generate_rankings(users):
     sortee = [ (len(v), k) for k,v in users.items() ]
     sortee.sort()
+    sortee.reverse()
     return [ (k,v) for v,k in sortee ]
 
 
@@ -142,7 +143,7 @@ def main(argv):
     api = get_api(username, password)
     ## TODO: fetch room profile, then for each user, see who in the room
     ## the user follows
-    room = api.get_room_profile(
+    #room = api.get_room_profile(
 
 
 if __name__ == '__main__':

@@ -5,8 +5,20 @@
 {% else %}
 <title>FF RoomRanker -- {{ subtitle }}</title>
 {% endif %}
+{% if subtitle %}
+<script type="text/javascript">
+<!--
+{{ script }}
+//-->
+</script>
+
+{% endif %}
 </head>
+{% if onload %}
+<body onLoad="{{ onLoad }}">
+{% else %}
 <body>
+{% endif %}
 {{ body }}
 </body>
 </html>
